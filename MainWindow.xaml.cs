@@ -228,7 +228,7 @@ namespace HandsInTheAir
                                        vSign = false;
                                        t.Stop();
                                        Console.WriteLine("VSign Stop");
-
+                                          
                                    }
                                    else if (mouseX < vSignX - Screen.PrimaryScreen.Bounds.Width * 0.5)
                                    {
