@@ -75,9 +75,15 @@
     <PXCCLRPath>$(RSSDK_DIR)\bin\win32\libpxcclr.cs.dll</PXCCLRPath>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="KeyBoardInjectService">
+      <HintPath>..\KeyBoardInjectService.dll</HintPath>
+    </Reference>
     <Reference Include="libpxcclr.cs, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(PXCCLRPath)</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>packages\Newtonsoft.Json.6.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -115,7 +121,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MouseInjection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -133,6 +138,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

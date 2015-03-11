@@ -1,7 +1,10 @@
 C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\bin\x64_debug\HandsInTheAir.exe.config
 C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\bin\x64_debug\HandsInTheAir.exe
 C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\bin\x64_debug\HandsInTheAir.pdb
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\bin\x64_debug\KeyBoardInjectService.dll
 C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\bin\x64_debug\libpxcclr.cs.dll
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\bin\x64_debug\Newtonsoft.Json.dll
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\bin\x64_debug\Newtonsoft.Json.xml
 C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\obj\x64\Debug\HandsInTheAir.csprojResolveAssemblyReference.cache
 C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\obj\x64\Debug\MainWindow.baml
 C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\obj\x64\Debug\MainWindow.g.cs

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Drawing;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -14,7 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Threading;
 using System.Windows.Forms;
-
+using KeyBoardInjectService;
 
 namespace HandsInTheAir
 {
@@ -28,12 +29,12 @@ namespace HandsInTheAir
         PXCMTouchlessController ptc;
 
         // Scrolling Feature
-        ScrollViewer myListscrollViwer;
-        double initialScrollPoint;
-        double initialScrollOffest;
-        const double scrollSensitivity = 10f;
         bool vSign = false;
+        bool Pinch = false;
         int vSignX = 0;
+        double lastZ = -1;
+        double lastpinchx = -1;
+        double lastpinchy = -1;
 
         public MainWindow()
         {
@@ -48,7 +49,8 @@ namespace HandsInTheAir
 
             StartFrameLoop();
         }
-
+        System.Timers.Timer tPinch = new System.Timers.Timer();
+        
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             StopRealSense();
@@ -60,6 +62,9 @@ namespace HandsInTheAir
             t.Enabled = true;
             t.Interval = 2000;
             t.Tick += t_Tick;
+            tPinch.Enabled = true;
+            tPinch.Interval = 500;
+            tPinch.Elapsed += tPinch_Tick;
             pxcmStatus rc;
 
             // creating Sense Manager
@@ -96,12 +101,17 @@ namespace HandsInTheAir
             
         }
 
+        void tPinch_Tick(object sender, EventArgs e)
+        {
+            Pinch = false;
+            tPinch.Stop();
+            MouseInjection.ReleaseLeft();
+        }
+
         void t_Tick(object sender, EventArgs e)
         {
             vSign = false;
             vSignX = 0;
-            t.Stop();
-            Console.WriteLine("VSign Start");
         }
 
         // on closing
@@ -111,7 +121,6 @@ namespace HandsInTheAir
             ptc.Dispose();
             psm.Close();
             psm.Dispose();
-           
         }
 
         private void UpdateConfiguration()
@@ -124,9 +133,10 @@ namespace HandsInTheAir
             if (rc != pxcmStatus.PXCM_STATUS_NO_ERROR)
                 Environment.Exit(-1);
             ptc.AddGestureActionMapping("v_sign", PXCMTouchlessController.Action.Action_None, new PXCMTouchlessController.OnFiredActionDelegate(OnVSign));
-            //ptc.AddGestureActionMapping("swipeLeft", PXCMTouchlessController.Action.Action_NextTrack, new PXCMTouchlessController.OnFiredActionDelegate(OnSwipeLeft));
+            ptc.AddGestureActionMapping("two_fingers_pinch_open", PXCMTouchlessController.Action.Action_None, new PXCMTouchlessController.OnFiredActionDelegate(OnFullPinch));
 
-            pInfo.config = PXCMTouchlessController.ProfileInfo.Configuration.Configuration_Scroll_Vertically | PXCMTouchlessController.ProfileInfo.Configuration.Configuration_Allow_Zoom;
+
+            pInfo.config = PXCMTouchlessController.ProfileInfo.Configuration.Configuration_Allow_Zoom;
 
             rc = ptc.SetProfile(pInfo);
             Console.WriteLine("Setting Profile: " + rc.ToString());
@@ -137,15 +147,25 @@ namespace HandsInTheAir
             psm.StreamFrames(false);
         }
 
+
+        private void OnFullPinch(PXCMTouchlessController.Action data)
+        {
+            Console.WriteLine("pinch");
+            tPinch.Stop();
+            tPinch.Start();
+            if (!Pinch)
+            MouseInjection.PressLeft();
+
+            Pinch = true;
+        }
+
+
        private void OnVSign(PXCMTouchlessController.Action data)
        {
-           if (!vSign)
-           {
-               vSign = true;
-               Console.WriteLine("VSign Start");
-               vSignX = (int)MouseInjection.getCursorPos().X;
-               t.Start();
-           }
+            vSign = true;
+            Console.WriteLine("VSign Start");
+            vSignX = (int)MouseInjection.getCursorPos().X;
+            t.Start();
        }
 
        System.Windows.Forms.Timer t = new System.Windows.Forms.Timer();
@@ -172,15 +192,33 @@ namespace HandsInTheAir
                             if (HandleHand.EnableSelect)
                             {
                                 Console.WriteLine("Select");
-                                //     MouseInjection.ClickLeftMouseButton();
+                                MouseInjection.ClickLeftMouseButton();
                             }
                         }
                         break;
                     case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_StartScroll:
                         {
                             Console.WriteLine("Start Scroll");
-                            initialScrollPoint = data.position.y;
-                            //    initialScrollOffest = myListscrollViwer.VerticalOffset;
+                            HandleHand.ToggleZoomEnable();
+                            HandleHand.ToggleSelectEnable();
+                            MouseInjection.PressLeft();
+                        }
+                        break;
+                    case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_EndScroll:
+                        {
+                            Console.WriteLine("End Scroll");
+                            MouseInjection.ReleaseLeft();
+                            HandleHand.ToggleZoomEnable();
+                            HandleHand.ToggleSelectEnable();
+                        }
+                        break;
+                    case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_Scroll:
+                        {
+                            Console.WriteLine("Scrolling...");
+                            Console.WriteLine("X: " + data.position.x + " Y: " + data.position.y);
+                            double mouseX = data.position.x * Screen.PrimaryScreen.Bounds.Width;
+                            double mouseY = data.position.y * Screen.PrimaryScreen.Bounds.Height;
+                            MouseInjection.SetCursorPos((int)mouseX, (int)mouseY);
                         }
                         break;
                     case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_Back:
@@ -191,92 +229,116 @@ namespace HandsInTheAir
                         break;
                     case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_Zoom:
                         {
-                            Console.WriteLine("Zooming");
+                            if (HandleHand.ZoomEnabled)
+                            {
+                                if (data.position.z > lastZ + 0.01)
+                                {
+                                    KeyBoardInjector.InjectKey(189);
+                                    Console.WriteLine("z: " + data.position.z);
+                                }
+                                else if (data.position.z < lastZ - 0.01)
+                                {
+                                    KeyBoardInjector.InjectKey(187);
+                                    Console.WriteLine("z: " + data.position.z);
+                                }
+
+                                lastZ = data.position.z;
+                            }
                         }
                         break;
                     case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_StartZoom:
                         {
-                            HandleHand.ToggleSelectEnable();
+                          //  HandleHand.ToggleSelectEnable();
+                            lastZ = data.position.z;
                             Console.WriteLine("StartZoom");
                         }
                         break;
                     case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_EndZoom:
                         {
-                            HandleHand.ToggleSelectEnable();
+                         //   HandleHand.ToggleSelectEnable();
+                            lastZ = -1;
                             Console.WriteLine("EndZoom");
                         }
                         break;
                     case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_CursorMove:
                         {
-                           if (HandleHand.MoveEnabled)
+                           if (true)
                            {       
-                                Point point = new Point();
-                                point.X = Math.Max(Math.Min(0.9F, data.position.x), 0.1F);
-                                point.Y = Math.Max(Math.Min(0.9F, data.position.y), 0.1F);
-
-                               // Point myListBoxPosition = DisplayArea.PointToScreen(new Point(0d, 0d));
-                                Point currPoint = MouseInjection.getCursorPos();
+                        
                                 double mouseX = data.position.x * Screen.PrimaryScreen.Bounds.Width;
                                 double mouseY = data.position.y * Screen.PrimaryScreen.Bounds.Height;
 
-                               // Console.WriteLine("x: "+ data.position.x + " y: " + data.position.y);
                                if (vSign)
-                               {
+                               { 
+                                   //Right 39
                                    if (mouseX > vSignX + Screen.PrimaryScreen.Bounds.Width * 0.5)
                                    {
                                        Console.WriteLine("swipe right");
                                        vSign = false;
                                        t.Stop();
+                                       KeyBoardInjector.InjectKey(39);
                                        Console.WriteLine("VSign Stop");
-                                          
                                    }
+                                   //Left 37
                                    else if (mouseX < vSignX - Screen.PrimaryScreen.Bounds.Width * 0.5)
                                    {
                                        Console.WriteLine("swipe left");
                                        vSign = false;
                                        t.Stop();
+                                       KeyBoardInjector.InjectKey(37);
                                        Console.WriteLine("VSign Stop");
                                    }
                                }
+
+                               //if(Pinch)
+                               //{
+                               //    if (lastpinchx != -1)
+                               //    {
+                               //        if (mouseX > lastpinchx + 25)
+                               //        {
+                               //            KeyBoardInjector.InjectKey(39);
+                               //            lastpinchx = mouseX;
+                               //        }
+                               //        else if (mouseX < lastpinchx - 25)
+                               //        {
+                               //            KeyBoardInjector.InjectKey(37);
+                               //            lastpinchx = mouseX;
+                               //        }
+                               //    }
+                               //    else
+                               //    {
+                               //        lastpinchx = mouseX;
+                               //    }
+
+                               //    if (lastpinchy != -1)
+                               //    {
+                               //        if (mouseY > lastpinchy + 25)
+                               //        {
+                               //            KeyBoardInjector.InjectKey(40);
+                               //            lastpinchy = mouseY;
+                               //        }
+                               //        else if (mouseY < lastpinchy - 25)
+                               //        {
+                               //            KeyBoardInjector.InjectKey(38);
+                               //            lastpinchy = mouseY;
+                               //        }
+                               //    }
+                               //    else
+                               //    {
+                               //        lastpinchy = mouseY;
+                               //    }
+                               //}
+
                                 MouseInjection.SetCursorPos((int)mouseX, (int)mouseY);
-                           }
-                           else
-                           {
-                               Console.WriteLine("Swipe...");
                            }
                         }
                         break;
-
                 }
             }
             else
             {
                 this.Dispatcher.Invoke(new Action(() => OnTouchlessControllerUXEvent(data)));
             }
-        }
-
-        public static DependencyObject GetScrollViewer(DependencyObject o)
-        {
-            // Return the DependencyObject if it is a ScrollViewer
-            if (o is ScrollViewer)
-            { return o; }
-
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(o); i++)
-            {
-                var child = VisualTreeHelper.GetChild(o, i);
-
-                var result = GetScrollViewer(child);
-                if (result == null)
-                {
-                    continue;
-                }
-                else
-                {
-                    return result;
-                }
-            }
-            return null;
-
         }
     }
 }

@@ -34,6 +34,16 @@ namespace HandsInTheAir
         }
 
 
+        private static bool m_EnableZoom = true;
+        public static bool ZoomEnabled { get { return m_EnableZoom; } }
+
+        public static bool ToggleZoomEnable()
+        {
+            m_EnableZoom = !m_EnableZoom;
+            return ZoomEnabled;
+        }
+
+
 
     }
 }
