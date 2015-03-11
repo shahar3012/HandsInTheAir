@@ -1,0 +1,16 @@
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\bin\x64_debug\touchless_listbox_sample.cs.exe.config
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\bin\x64_debug\touchless_listbox_sample.cs.exe
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\bin\x64_debug\touchless_listbox_sample.cs.pdb
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\bin\x64_debug\libpxcclr.cs.dll
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\obj\x64\Debug\MainWindow.baml
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\obj\x64\Debug\MainWindow.g.cs
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\obj\x64\Debug\App.g.cs
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\obj\x64\Debug\touchless_listbox_sample.cs_MarkupCompile.cache
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\obj\x64\Debug\touchless_listbox_sample.cs.g.resources
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\obj\x64\Debug\touchless_listbox_sample.cs.Properties.Resources.resources
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\obj\x64\Debug\touchless_listbox_sample.cs_vs2010-13.csproj.GenerateResource.Cache
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\obj\x64\Debug\touchless_listbox_sample.cs.exe
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\obj\x64\Debug\touchless_listbox_sample.cs.pdb
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\obj\x64\Debug\touchless_listbox_sample.cs_vs2010-13.csprojResolveAssemblyReference.cache
+C:\Program Files (x86)\Intel\RSSDK\framework\CSharp\touchless_listbox_sample.cs\bin\x64_debug\HandsInTheAir.exe.config
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\bin\x64_debug\HandsInTheAir.exe.config

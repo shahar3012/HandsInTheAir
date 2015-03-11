@@ -1,0 +1,14 @@
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\bin\x64_debug\HandsInTheAir.exe.config
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\bin\x64_debug\HandsInTheAir.exe
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\bin\x64_debug\HandsInTheAir.pdb
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\bin\x64_debug\libpxcclr.cs.dll
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\obj\x64\Debug\HandsInTheAir.csprojResolveAssemblyReference.cache
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\obj\x64\Debug\MainWindow.baml
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\obj\x64\Debug\MainWindow.g.cs
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\obj\x64\Debug\App.g.cs
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\obj\x64\Debug\HandsInTheAir_MarkupCompile.cache
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\obj\x64\Debug\HandsInTheAir.g.resources
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\obj\x64\Debug\HandsInTheAir.Properties.Resources.resources
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\obj\x64\Debug\HandsInTheAir.csproj.GenerateResource.Cache
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\obj\x64\Debug\HandsInTheAir.exe
+C:\Users\Hackathon-IDF\Documents\GitHub\HandsInTheAir\obj\x64\Debug\HandsInTheAir.pdb
