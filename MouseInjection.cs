@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Windows;
 
-namespace TouchlessListBox
+namespace HandsInTheAir
 {
     class MouseInjection
     {

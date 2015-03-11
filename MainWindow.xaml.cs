@@ -16,7 +16,7 @@ using System.Threading;
 using System.Windows.Forms;
 
 
-namespace TouchlessListBox
+namespace HandsInTheAir
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -156,8 +156,9 @@ namespace TouchlessListBox
                         break;
                     case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_Zoom:
                         {
-                            break;
+                            HandsInTheAir.HandleHand.ToggleSelectEnable();
                         }
+                        break;
                     case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_StartZoom:
                         {
                             break;
