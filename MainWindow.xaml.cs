@@ -32,6 +32,8 @@ namespace HandsInTheAir
         double initialScrollPoint;
         double initialScrollOffest;
         const double scrollSensitivity = 10f;
+        bool vSign = false;
+        int vSignX = 0;
 
         public MainWindow()
         {
@@ -55,7 +57,9 @@ namespace HandsInTheAir
         private void StartRealSense()
         {
             Console.WriteLine("Starting Touchless Controller");
-
+            t.Enabled = true;
+            t.Interval = 2000;
+            t.Tick += t_Tick;
             pxcmStatus rc;
 
             // creating Sense Manager
@@ -92,6 +96,14 @@ namespace HandsInTheAir
             
         }
 
+        void t_Tick(object sender, EventArgs e)
+        {
+            vSign = false;
+            vSignX = 0;
+            t.Stop();
+            Console.WriteLine("VSign Start");
+        }
+
         // on closing
         private void StopRealSense()
         {
@@ -111,10 +123,10 @@ namespace HandsInTheAir
             Console.WriteLine("Querying Profile: " + rc.ToString());
             if (rc != pxcmStatus.PXCM_STATUS_NO_ERROR)
                 Environment.Exit(-1);
+            ptc.AddGestureActionMapping("v_sign", PXCMTouchlessController.Action.Action_None, new PXCMTouchlessController.OnFiredActionDelegate(OnVSign));
+            //ptc.AddGestureActionMapping("swipeLeft", PXCMTouchlessController.Action.Action_NextTrack, new PXCMTouchlessController.OnFiredActionDelegate(OnSwipeLeft));
 
             pInfo.config = PXCMTouchlessController.ProfileInfo.Configuration.Configuration_Scroll_Vertically | PXCMTouchlessController.ProfileInfo.Configuration.Configuration_Allow_Zoom;
-
-
 
             rc = ptc.SetProfile(pInfo);
             Console.WriteLine("Setting Profile: " + rc.ToString());
@@ -124,6 +136,20 @@ namespace HandsInTheAir
         {
             psm.StreamFrames(false);
         }
+
+       private void OnVSign(PXCMTouchlessController.Action data)
+       {
+           if (!vSign)
+           {
+               vSign = true;
+               Console.WriteLine("VSign Start");
+               vSignX = (int)MouseInjection.getCursorPos().X;
+               t.Start();
+           }
+       }
+
+       System.Windows.Forms.Timer t = new System.Windows.Forms.Timer();
+       
 
         private void OnTouchlessControllerUXEvent(PXCMTouchlessController.UXEventData data)
         {
@@ -143,44 +169,81 @@ namespace HandsInTheAir
                         break;
                     case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_Select:
                         {
-                            Console.WriteLine("Select");
-                       //     MouseInjection.ClickLeftMouseButton();
+                            if (HandleHand.EnableSelect)
+                            {
+                                Console.WriteLine("Select");
+                                //     MouseInjection.ClickLeftMouseButton();
+                            }
                         }
                         break;
                     case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_StartScroll:
                         {
                             Console.WriteLine("Start Scroll");
                             initialScrollPoint = data.position.y;
-                        //    initialScrollOffest = myListscrollViwer.VerticalOffset;
+                            //    initialScrollOffest = myListscrollViwer.VerticalOffset;
+                        }
+                        break;
+                    case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_Back:
+                        {
+                            Console.WriteLine("back");
+                            //    initialScrollOffest = myListscrollViwer.VerticalOffset;
                         }
                         break;
                     case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_Zoom:
                         {
-                            HandsInTheAir.HandleHand.ToggleSelectEnable();
+                            Console.WriteLine("Zooming");
                         }
                         break;
                     case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_StartZoom:
                         {
-                            break;
+                            HandleHand.ToggleSelectEnable();
+                            Console.WriteLine("StartZoom");
                         }
+                        break;
                     case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_EndZoom:
                         {
-                            break;
+                            HandleHand.ToggleSelectEnable();
+                            Console.WriteLine("EndZoom");
                         }
+                        break;
                     case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_CursorMove:
                         {
-                            Point point = new Point();
-                            point.X = Math.Max(Math.Min(0.9F, data.position.x), 0.1F);
-                            point.Y = Math.Max(Math.Min(0.9F, data.position.y), 0.1F);
+                           if (HandleHand.MoveEnabled)
+                           {       
+                                Point point = new Point();
+                                point.X = Math.Max(Math.Min(0.9F, data.position.x), 0.1F);
+                                point.Y = Math.Max(Math.Min(0.9F, data.position.y), 0.1F);
 
-                           // Point myListBoxPosition = DisplayArea.PointToScreen(new Point(0d, 0d));
-                            Point currPoint = MouseInjection.getCursorPos();
-                            double mouseX = data.position.x * Screen.PrimaryScreen.Bounds.Width;
-                            double mouseY = data.position.y * Screen.PrimaryScreen.Bounds.Height;
+                               // Point myListBoxPosition = DisplayArea.PointToScreen(new Point(0d, 0d));
+                                Point currPoint = MouseInjection.getCursorPos();
+                                double mouseX = data.position.x * Screen.PrimaryScreen.Bounds.Width;
+                                double mouseY = data.position.y * Screen.PrimaryScreen.Bounds.Height;
 
-                           // Console.WriteLine("x: "+ data.position.x + " y: " + data.position.y);
+                               // Console.WriteLine("x: "+ data.position.x + " y: " + data.position.y);
+                               if (vSign)
+                               {
+                                   if (mouseX > vSignX + Screen.PrimaryScreen.Bounds.Width * 0.5)
+                                   {
+                                       Console.WriteLine("swipe right");
+                                       vSign = false;
+                                       t.Stop();
+                                       Console.WriteLine("VSign Stop");
 
-                            MouseInjection.SetCursorPos((int)mouseX, (int)mouseY);
+                                   }
+                                   else if (mouseX < vSignX - Screen.PrimaryScreen.Bounds.Width * 0.5)
+                                   {
+                                       Console.WriteLine("swipe left");
+                                       vSign = false;
+                                       t.Stop();
+                                       Console.WriteLine("VSign Stop");
+                                   }
+                               }
+                                MouseInjection.SetCursorPos((int)mouseX, (int)mouseY);
+                           }
+                           else
+                           {
+                               Console.WriteLine("Swipe...");
+                           }
                         }
                         break;
 
