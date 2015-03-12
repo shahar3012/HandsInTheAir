@@ -1,7 +1,7 @@
 ﻿<Window x:Class="HandsInTheAir.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Touchless List Box" Height="0" Width="0"
+        Title="Hands In The Air" Height="0" Width="0"
         Closing="Window_Closing"
         Loaded="Window_Loaded" ResizeMode="NoResize" Opacity="0" WindowStyle="None">
     <!-- When the mouse pointer is over this Border -->

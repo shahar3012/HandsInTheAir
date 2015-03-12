@@ -114,6 +114,9 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Gestures.cs" />
+    <Compile Include="ProcessGestures.cs" />
+    <Compile Include="GestureDetails.cs" />
     <Compile Include="HandleHand.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
