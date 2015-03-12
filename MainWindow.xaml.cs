@@ -34,6 +34,7 @@ namespace HandsInTheAir
         bool vSign = false;
         bool Pinch = false;
         int vSignX = 0;
+        int vSignY = 0;
         double lastZ = -1;
 
         Gestures loadedGestures;
@@ -143,6 +144,7 @@ namespace HandsInTheAir
         {
                 vSign = false;
                 vSignX = 0;
+                vSignY = 0;
         }
 
         // on closing
@@ -206,12 +208,13 @@ namespace HandsInTheAir
            ProcessGestures processGestures = this.loadedGestures.gestures.FirstOrDefault((process) => { return process.processName == ProcessHandle.getCurrProcessName(); });
            if (processGestures != null)
            {
-               GestureDetails gestureDetails = processGestures.shortcuts.FirstOrDefault((gesture) => { return gesture.gestureType == "swipeRight" || gesture.gestureType == "swipeLeft"; });
+               GestureDetails gestureDetails = processGestures.shortcuts.FirstOrDefault((gesture) => { return gesture.gestureType == "swipeRight" || gesture.gestureType == "swipeLeft" || gesture.gestureType == "swipeUp" || gesture.gestureType == "swipDown"; });
                 if (gestureDetails != null)
                 {
                     vSign = true;
                     Console.WriteLine("VSign Start");
                     vSignX = (int)MouseInjection.getCursorPos().X;
+                    vSignY = (int)MouseInjection.getCursorPos().Y;
                     t.Start();
                 }
            }
@@ -338,7 +341,8 @@ namespace HandsInTheAir
 
                                     if (vSign)
                                     {
-                                        if (mouseX > vSignX + Screen.PrimaryScreen.Bounds.Width * 0.5)
+                                        //Right-Left
+                                        if (mouseX > vSignX + Screen.PrimaryScreen.Bounds.Width * 0.5 && vSign)
                                         {
                                              GestureDetails gestureDetails = processGestures.shortcuts.FirstOrDefault((gesture) => { return gesture.gestureType == "swipeRight"; });
                                              if (gestureDetails != null)
@@ -350,7 +354,7 @@ namespace HandsInTheAir
                                                  Console.WriteLine("VSign Stop");
                                              }
                                         }
-                                        else if (mouseX < vSignX - Screen.PrimaryScreen.Bounds.Width * 0.5)
+                                        else if (mouseX < vSignX - Screen.PrimaryScreen.Bounds.Width * 0.5 && vSign)
                                         {
                                              GestureDetails gestureDetails = processGestures.shortcuts.FirstOrDefault((gesture) => { return gesture.gestureType == "swipeLeft"; });
                                              if (gestureDetails != null)
@@ -361,6 +365,31 @@ namespace HandsInTheAir
                                                  PressAndReleaseKeyList(gestureDetails.keys);
                                                  Console.WriteLine("VSign Stop");
                                              }
+                                        }
+                                        //Up-Down
+                                        else if (mouseY > vSignY + Screen.PrimaryScreen.Bounds.Height * 0.5 && vSign)
+                                        {
+                                            GestureDetails gestureDetails = processGestures.shortcuts.FirstOrDefault((gesture) => { return gesture.gestureType == "swipeDown"; });
+                                            if (gestureDetails != null)
+                                            {
+                                                Console.WriteLine("swipe down");
+                                                vSign = false;
+                                                t.Stop();
+                                                PressAndReleaseKeyList(gestureDetails.keys);
+                                                Console.WriteLine("VSign Stop");
+                                            }
+                                        }
+                                        else if (mouseY < vSignY - Screen.PrimaryScreen.Bounds.Height * 0.5 && vSign)
+                                        {
+                                            GestureDetails gestureDetails = processGestures.shortcuts.FirstOrDefault((gesture) => { return gesture.gestureType == "swipeUp"; });
+                                            if (gestureDetails != null)
+                                            {
+                                                Console.WriteLine("swipe up");
+                                                vSign = false;
+                                                t.Stop();
+                                                PressAndReleaseKeyList(gestureDetails.keys);
+                                                Console.WriteLine("VSign Stop");
+                                            }
                                         }
                                     }
 
