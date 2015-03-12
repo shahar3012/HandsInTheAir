@@ -89,7 +89,7 @@ namespace HandsInTheAir
             tPinch.Interval = 500;
             tPinch.Elapsed += tPinch_Tick;
             pxcmStatus rc;
-
+            
             // creating Sense Manager
             psm = PXCMSenseManager.CreateInstance();
             Console.WriteLine("Creating SenseManager: " + psm == null ? "failed" : "success");
@@ -126,21 +126,23 @@ namespace HandsInTheAir
 
         void tPinch_Tick(object sender, EventArgs e)
         {
-            if (this.loadedGestures.gestures.Any((process) => { return process.processName == ProcessHandle.getCurrProcessName(); }))
+            ProcessGestures processGestures = this.loadedGestures.gestures.FirstOrDefault((process) => { return process.processName == ProcessHandle.getCurrProcessName(); });
+            if (processGestures != null)
             {
-                Pinch = false;
-                tPinch.Stop();
-                MouseInjection.ReleaseLeft();
+                GestureDetails gestureDetails = processGestures.shortcuts.FirstOrDefault((gesture) => { return gesture.gestureType == "pinch"; });
+                if (gestureDetails != null)
+                {
+                    Pinch = false;
+                    tPinch.Stop();
+                    ReleaseKeyList(gestureDetails.keys);
+                }
             }
         }
 
         void t_Tick(object sender, EventArgs e)
         {
-            if (this.loadedGestures.gestures.Any((process) => { return process.processName == ProcessHandle.getCurrProcessName(); }))
-            {
                 vSign = false;
                 vSignX = 0;
-            }
         }
 
         // on closing
@@ -179,29 +181,39 @@ namespace HandsInTheAir
 
         private void OnFullPinch(PXCMTouchlessController.Action data)
         {
-            if (this.loadedGestures.gestures.Any((process) => { return process.processName == ProcessHandle.getCurrProcessName(); }))
-            {
-                Console.WriteLine("pinch");
-                tPinch.Stop();
-                tPinch.Start();
-                if (!Pinch)
+            ProcessGestures processGestures = this.loadedGestures.gestures.FirstOrDefault((process) => { return process.processName == ProcessHandle.getCurrProcessName(); });
+            if (processGestures != null)
+            {       
+                GestureDetails gestureDetails = processGestures.shortcuts.FirstOrDefault((gesture) => { return gesture.gestureType == "pinch"; });
+                if (gestureDetails != null)
                 {
-                    MouseInjection.PressLeft();
-                }
+                    Console.WriteLine("pinch");
+                    tPinch.Stop();
+                    tPinch.Start();
+                    if (!Pinch)
+                    {
+                        PressKeyList(gestureDetails.keys);
+                    }
 
-                Pinch = true;
+                    Pinch = true;
+                }
             }
         }
 
 
        private void OnVSign(PXCMTouchlessController.Action data)
        {
-           if (this.loadedGestures.gestures.Any((process) => { return process.processName == ProcessHandle.getCurrProcessName(); }))
+           ProcessGestures processGestures = this.loadedGestures.gestures.FirstOrDefault((process) => { return process.processName == ProcessHandle.getCurrProcessName(); });
+           if (processGestures != null)
            {
-               vSign = true;
-               Console.WriteLine("VSign Start");
-               vSignX = (int)MouseInjection.getCursorPos().X;
-               t.Start();
+               GestureDetails gestureDetails = processGestures.shortcuts.FirstOrDefault((gesture) => { return gesture.gestureType == "swipeRight" || gesture.gestureType == "swipeLeft"; });
+                if (gestureDetails != null)
+                {
+                    vSign = true;
+                    Console.WriteLine("VSign Start");
+                    vSignX = (int)MouseInjection.getCursorPos().X;
+                    t.Start();
+                }
            }
        }
 
@@ -210,10 +222,15 @@ namespace HandsInTheAir
 
         private void OnTouchlessControllerUXEvent(PXCMTouchlessController.UXEventData data)
         {
-            if (this.loadedGestures.gestures.Any((process) => { return process.processName == ProcessHandle.getCurrProcessName(); }))
+            if (this.Dispatcher.CheckAccess())
             {
-                if (this.Dispatcher.CheckAccess())
-                {
+            string name = ProcessHandle.getCurrProcessName();
+
+            ProcessGestures processGestures = 
+                this.loadedGestures.gestures.FirstOrDefault(p => p.processName.Equals(name));
+            if (processGestures != null)
+            {
+            
                     switch (data.type)
                     {
                         case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_CursorVisible:
@@ -228,10 +245,14 @@ namespace HandsInTheAir
                             break;
                         case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_Select:
                             {
-                                if (HandleHand.EnableSelect)
+                                GestureDetails gestureDetails = processGestures.shortcuts.FirstOrDefault((gesture) => { return gesture.gestureType == "tap";});
+                                if (gestureDetails != null)
                                 {
-                                    Console.WriteLine("Select");
-                                    MouseInjection.ClickLeftMouseButton();
+                                    if  (HandleHand.EnableSelect)
+                                    {
+                                        Console.WriteLine("Select");
+                                        PressAndReleaseKeyList(gestureDetails.keys);
+                                    }
                                 }
                             }
                             break;
@@ -268,21 +289,29 @@ namespace HandsInTheAir
                             break;
                         case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_Zoom:
                             {
-                                if (HandleHand.ZoomEnabled)
-                                {
-                                    if (data.position.z > lastZ + 0.01)
+                                    if (HandleHand.ZoomEnabled)
                                     {
-                                        MouseInjection.moveWheelDown();
-                                        Console.WriteLine("z: " + data.position.z);
-                                    }
-                                    else if (data.position.z < lastZ - 0.01)
-                                    {
-                                        MouseInjection.moveWheelUp();
-                                        Console.WriteLine("z: " + data.position.z);
-                                    }
+                                        if (data.position.z > lastZ + 0.01)
+                                        {
+                                            GestureDetails gestureDetails = processGestures.shortcuts.FirstOrDefault((gesture) => { return gesture.gestureType == "zoomout"; });
+                                            if (gestureDetails != null)
+                                            {
+                                                PressAndReleaseKeyList(gestureDetails.keys);
+                                                Console.WriteLine("z: " + data.position.z);
+                                            }
+                                        }
+                                        else if (data.position.z < lastZ - 0.01)
+                                        {
+                                             GestureDetails gestureDetails = processGestures.shortcuts.FirstOrDefault((gesture) => { return gesture.gestureType == "zoomin"; });
+                                             if (gestureDetails != null)
+                                             {
+                                                 PressAndReleaseKeyList(gestureDetails.keys);
+                                                 Console.WriteLine("z: " + data.position.z);
+                                             }
+                                        }
 
-                                    lastZ = data.position.z;
-                                }
+                                        lastZ = data.position.z;
+                                    }
                             }
                             break;
                         case PXCMTouchlessController.UXEventData.UXEventType.UXEvent_StartZoom:
@@ -309,23 +338,29 @@ namespace HandsInTheAir
 
                                     if (vSign)
                                     {
-                                        //Right 39
                                         if (mouseX > vSignX + Screen.PrimaryScreen.Bounds.Width * 0.5)
                                         {
-                                            Console.WriteLine("swipe right");
-                                            vSign = false;
-                                            t.Stop();
-                                            KeyBoardInjector.InjectKey(39);
-                                            Console.WriteLine("VSign Stop");
+                                             GestureDetails gestureDetails = processGestures.shortcuts.FirstOrDefault((gesture) => { return gesture.gestureType == "swipeRight"; });
+                                             if (gestureDetails != null)
+                                             {
+                                                 Console.WriteLine("swipe right");
+                                                 vSign = false;
+                                                 t.Stop();
+                                                 PressAndReleaseKeyList(gestureDetails.keys);
+                                                 Console.WriteLine("VSign Stop");
+                                             }
                                         }
-                                        //Left 37
                                         else if (mouseX < vSignX - Screen.PrimaryScreen.Bounds.Width * 0.5)
                                         {
-                                            Console.WriteLine("swipe left");
-                                            vSign = false;
-                                            t.Stop();
-                                            KeyBoardInjector.InjectKey(37);
-                                            Console.WriteLine("VSign Stop");
+                                             GestureDetails gestureDetails = processGestures.shortcuts.FirstOrDefault((gesture) => { return gesture.gestureType == "swipeLeft"; });
+                                             if (gestureDetails != null)
+                                             {
+                                                 Console.WriteLine("swipe left");
+                                                 vSign = false;
+                                                 t.Stop();
+                                                 PressAndReleaseKeyList(gestureDetails.keys);
+                                                 Console.WriteLine("VSign Stop");
+                                             }
                                         }
                                     }
 
@@ -334,12 +369,127 @@ namespace HandsInTheAir
                             }
                             break;
                     }
-                }
             }
+        }
             else
             {
                 this.Dispatcher.Invoke(new Action(() => OnTouchlessControllerUXEvent(data)));
             }
         }
+
+        public enum KEYSIGN
+        {
+            LEFTMOUSEPRESS = -1,
+            RIGHTMOUSEPRESS = -2,
+            MOUSEWHEELDOWN = -3,
+            MOUSEWHEELUP = -4
+
+        };
+
+        public void PressAndReleaseKeyList(int[] keys)
+        {
+            PressKeyList(keys);
+            ReleaseKeyList(keys);
+        }
+
+        public void PressKeyList(int[] keys)
+        {
+            for (int i = 0; i < keys.Length; i++)
+            {
+                PressByKeyCode(keys[i]);
+            }
+        }
+
+        public void ReleaseKeyList(int[] keys)
+        {
+            for (int i = 0; i < keys.Length; i++)
+            {
+                ReleaseByKeyCode(keys[i]);
+            }
+        }
+
+        public static void SendOrderByKeyCode(int keyCode)
+        {
+            switch (keyCode)
+            {
+                case (int)KEYSIGN.LEFTMOUSEPRESS:
+                    {
+                        MouseInjection.ClickLeftMouseButton();
+                        break;
+                    }
+                case (int)KEYSIGN.RIGHTMOUSEPRESS:
+                    {
+                        MouseInjection.ClickRightMouseButton();
+                        break;
+                    }
+                case (int)KEYSIGN.MOUSEWHEELUP:
+                    {
+                        MouseInjection.moveWheelUp();
+                        break;
+                    }
+                case (int)KEYSIGN.MOUSEWHEELDOWN:
+                    {
+                        MouseInjection.moveWheelDown();
+                        break;
+                    }
+                default:
+                    {
+                        KeyBoardInjector.InjectKey(keyCode);
+                        break;
+                    }
+            }
+        }
+        public static void ReleaseByKeyCode(int keyCode)
+        {
+            switch (keyCode)
+            {
+                case (int)KEYSIGN.LEFTMOUSEPRESS:
+                    {
+                        MouseInjection.ReleaseLeft();
+                        break;
+                    }
+                case (int)KEYSIGN.RIGHTMOUSEPRESS:
+                    {
+                        MouseInjection.ReleaseRight();
+                        break;
+                    }
+                default:
+                    {
+                        KeyBoardInjector.ReleaseKey(keyCode);
+                        break;
+                    }
+            }
+        }
+        public static void PressByKeyCode(int keyCode)
+        {
+            switch (keyCode)
+            {
+                case (int)KEYSIGN.LEFTMOUSEPRESS:
+                    {
+                        MouseInjection.PressLeft();
+                        break;
+                    }
+                case (int)KEYSIGN.RIGHTMOUSEPRESS:
+                    {
+                        MouseInjection.PressRight();
+                        break;
+                    }
+                case (int)KEYSIGN.MOUSEWHEELUP:
+                    {
+                        MouseInjection.moveWheelUp();
+                        break;
+                    }
+                case (int)KEYSIGN.MOUSEWHEELDOWN:
+                    {
+                        MouseInjection.moveWheelDown();
+                        break;
+                    }
+                default:
+                    {
+                        KeyBoardInjector.PressKey(keyCode);
+                        break;
+                    }
+            }
+        }
+        }
     }
-}
